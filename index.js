@@ -4,7 +4,8 @@ var DEFAULT_CHANNEL = 'some-global-channel-name';
 var MUTE_AUDIO_BY_DEFAULT = false;
 
 var ICE_SERVERS = [
-    {url:"stun:stun.l.google.com:19302"}
+    {urls: "stun:stun.l.google.com:19302"},
+    {urls: "turn:try.refactored.ai:3478", username: "test99", credential: "test"}
 ];
 
 
@@ -21,6 +22,7 @@ function init() {
     signaling_socket.on('connect', function() {
         console.log("Connected to signaling server");
         join_chat_channel(DEFAULT_CHANNEL, {'whatever-you-want-here': 'stuff'});
+        $('body').append($('<h3>'+signaling_socket.id+'</h3><hr/><br/>'));
     });
     signaling_socket.on('disconnect', function() {
         console.log("Disconnected from signaling server");
@@ -56,10 +58,17 @@ function init() {
         var peer_connection = new RTCPeerConnection({"iceServers": ICE_SERVERS});
         peers[peer_id] = peer_connection;
         var dataChannel = peer_connection.createDataChannel('data');
-        var key = Math.random().toString(36).substring(7);
-        dcs[key] = dataChannel;
+        dcs[peer_id] = dataChannel;
+        var button = $('<button/>').text('send to '+peer_id).click(function () {
+            dataChannel.send((new Date).getTime());
+        });
+        $('body').append(button);
+        $('body').append($('<br/><span id="'+peer_id+'"></span><br/><br/>'));
         console.log('create data channel');
-        dataChannel.onmessage = function(e) { console.log(e.data); };
+        dataChannel.onmessage = function(e) { 
+            $('#'+peer_id).text(peer_id+' time: '+e.data);
+            console.log(e.data); 
+        };
 
         peer_connection.onicecandidate = function(event) {
             if (event.candidate) {
@@ -107,10 +116,11 @@ function init() {
 
         peer.ondatachannel = function (event) {
             var dataChannel = event.channel;
-            var key = Math.random().toString(36).substring(7);
-            //dcs[key] = dataChannel;
             console.log('ondatachannel');
-            dataChannel.onmessage = function(e) { console.log(e.data); };
+            dataChannel.onmessage = function(e) { 
+                $('#'+peer_id).text(e.data);
+                console.log(e.data); 
+            };
         };
 
         var remote_description = config.session_description;
