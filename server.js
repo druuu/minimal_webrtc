@@ -13,6 +13,7 @@ var io = socketIO.listen(app);
 var channels = {};
 var sockets = {};
 io.sockets.on('connection', function (socket) {
+    socket.emit('sockets', Object.keys(sockets).length);
     socket.channels = {};
     sockets[socket.id] = socket;
 
@@ -24,7 +25,6 @@ io.sockets.on('connection', function (socket) {
         console.log("["+ socket.id + "] disconnected");
         delete sockets[socket.id];
     });
-
 
     socket.on('join', function (config) {
         console.log("["+ socket.id + "] join ", config);
