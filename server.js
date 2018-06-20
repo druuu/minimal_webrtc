@@ -13,7 +13,6 @@ var io = socketIO.listen(app);
 var channels = {};
 var sockets = {};
 io.sockets.on('connection', function (socket) {
-    socket.emit('sockets', Object.keys(sockets).length);
     socket.channels = {};
     sockets[socket.id] = socket;
 
@@ -46,6 +45,7 @@ io.sockets.on('connection', function (socket) {
             socket.emit('addPeer', {'peer_id': id, 'should_create_offer': true});
         }
 
+        socket.emit('sockets', Object.keys(channels[channel]).length);
         channels[channel][socket.id] = socket;
         socket.channels[channel] = channel;
     });
