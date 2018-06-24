@@ -1,6 +1,6 @@
 var os = require('os');
 var nodeStatic = require('node-static');
-var https = require('https');
+var http = require('http');
 var fs = require('fs');
 var socketIO = require('socket.io');
 
@@ -10,7 +10,7 @@ var options = {
     cert: fs.readFileSync('/etc/letsencrypt/live/finwin.io/cert.pem'),
     ca: fs.readFileSync('/etc/letsencrypt/live/finwin.io/chain.pem')
 }
-var app = https.createServer(options, function (req, res) {
+var app = http.createServer(function (req, res) {
     fileServer.serve(req, res);
 }).listen(1256, '0.0.0.0');
 
